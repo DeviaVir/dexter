@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/coreos/go-oidc"
 	"github.com/ghodss/yaml"
-	"github.com/gini/dexter/utils"
+	"github.com/DeviaVir/dexter/utils"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"golang.org/x/oauth2"
@@ -396,7 +396,7 @@ var (
 		Use:   "auth",
 		Short: "Authenticate with OIDC provider",
 		Long: `Use your Google login to get a JWT (JSON Web Token) and update your
-local k8s config accordingly. A refresh token is added and automatically refreshed 
+local k8s config accordingly. A refresh token is added and automatically refreshed
 by kubectl. Existing token configurations are overwritten.
 For details go to: https://blog.gini.net/
 

@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/spf13/cobra"
-	"github.com/gini/dexter/version"
+	"github.com/DeviaVir/dexter/version"
 )
 
 var (

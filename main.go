@@ -2,7 +2,7 @@ package main
 
 import (
 	log "github.com/sirupsen/logrus"
-	"github.com/gini/dexter/cmd"
+	"github.com/DeviaVir/dexter/cmd"
 )
 
 func main() {
