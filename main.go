@@ -1,21 +1,21 @@
 package main
 
 import (
-  "context"
+	"context"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
 	"strings"
-  "time"
-	"io/ioutil"
+	"time"
 
-  "github.com/DeviaVir/dexter/utils"
+	"github.com/DeviaVir/dexter/utils"
 	"github.com/coreos/go-oidc"
 	"github.com/ghodss/yaml"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
-  "golang.org/x/oauth2/google"
+	"golang.org/x/oauth2/google"
 	"golang.org/x/oauth2/microsoft"
 	"gopkg.in/square/go-jose.v2/jwt"
 	k8sRuntime "k8s.io/apimachinery/pkg/runtime"
@@ -34,7 +34,7 @@ type dexterOIDChttp struct {
 	clientID        string            // clientID commandline flag
 	clientSecret    string            // clientSecret commandline flag
 	authName        string            // Cluster name
-  state           string            // CSRF protection
+	state           string            // CSRF protection
 	kubeConfig      string            // Path to an existing kubeconfig
 	scopes          []string          // Additional scopes to request
 	authCodeOptions map[string]string // Authorization code options
@@ -86,9 +86,8 @@ func (d *dexterOIDChttp) createOauth2Config() error {
 }
 
 func (d *dexterOIDChttp) handler(w http.ResponseWriter, r *http.Request) {
-  http.Redirect(w, r, d.authURL(), http.StatusSeeOther)
+	http.Redirect(w, r, d.authURL(), http.StatusSeeOther)
 }
-
 
 func (d *dexterOIDChttp) authURL() string {
 	// Use provided authorization code options
@@ -253,7 +252,7 @@ func (d *dexterOIDChttp) main() {
 	http.HandleFunc("/callback", d.callbackHandler)
 	if parsedURL.Scheme == "http" {
 		err = http.ListenAndServe(parsedURL.Host, nil)
-    if err != nil {
+		if err != nil {
 			if err != http.ErrServerClosed {
 				log.Errorf("Failed to start web server: %s", err)
 				panic(1)
@@ -282,7 +281,7 @@ func (d *dexterOIDChttp) getEnv(key, fallback string) string {
 }
 
 var (
-  oidcDataHTTP = dexterOIDChttp{
+	oidcDataHTTP = dexterOIDChttp{
 		Oauth2Config: &oauth2.Config{},
 		httpClient:   &http.Client{Timeout: 60 * time.Second},
 	}
@@ -293,7 +292,7 @@ func main() {
 	log.SetFormatter(&log.TextFormatter{FullTimestamp: true})
 	log.SetLevel(log.InfoLevel)
 
-  oidcDataHTTP.endpoint = oidcDataHTTP.getEnv("ENDPOINT", "google")
+	oidcDataHTTP.endpoint = oidcDataHTTP.getEnv("ENDPOINT", "google")
 	oidcDataHTTP.url = oidcDataHTTP.getEnv("URL", "http://0.0.0.0:3000")
 	oidcDataHTTP.callback = oidcDataHTTP.getEnv("CALLBACK", "http://127.0.0.1:3000/callback")
 	oidcDataHTTP.azureTenant = oidcDataHTTP.getEnv("AZURE_TENANT", "")
@@ -301,15 +300,15 @@ func main() {
 	oidcDataHTTP.clientSecret = oidcDataHTTP.getEnv("CLIENT_SECRET", "REDACTED")
 	oidcDataHTTP.authName = oidcDataHTTP.getEnv("AUTH_NAME", "")
 	oidcDataHTTP.kubeConfig = oidcDataHTTP.getEnv("KUBE_CONFIG_PATH", "")
-  oidcDataHTTP.httpClient = &http.Client{Timeout: 2 * time.Second}
-  oidcDataHTTP.Oauth2Config = &oauth2.Config{}
+	oidcDataHTTP.httpClient = &http.Client{Timeout: 2 * time.Second}
+	oidcDataHTTP.Oauth2Config = &oauth2.Config{}
 
 	if oidcDataHTTP.clientID == "" || oidcDataHTTP.clientSecret == "" {
 		log.Error("clientID and clientSecret cannot be empty!")
 		return
 	}
 
-  oidcDataHTTP.state = utils.RandomString()
+	oidcDataHTTP.state = utils.RandomString()
 
 	// setup oauth2 object
 	if err := oidcDataHTTP.createOauth2Config(); err != nil {
