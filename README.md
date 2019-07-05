@@ -9,10 +9,12 @@ All you need is a properly configured Google or Azure client ID & secret.
 
 Run in a container:
 ```
-docker run -it -p 3000:3000 --rm -e CLIENT_ID=REDACTED -e CLIENT_SECRET=REDACTED -e USER=root deviavir/dexter
+docker run -it -p 3000:3000 --rm -e CLIENT_ID=REDACTED -e CLIENT_SECRET=REDACTED -e KUBE_CONFIG_PATH=/kubeconfig -e USER=root -v kubeconfig:/kubeconfig deviavir/dexter
 ```
 
 Users visiting `your-host:3000` will be oauth'ed and presented with a kubeconfig they can use to authenticate.
+
+We expect `your-email` as the boilerplate email in the `kubeconfig` you provide. You can also simply not provide a kubeconfig if you only want the user authentication details returned.
 
 ## Authors
 

@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
   "time"
+	"io/ioutil"
 
   "github.com/DeviaVir/dexter/utils"
 	"github.com/coreos/go-oidc"
@@ -18,6 +19,7 @@ import (
 	"golang.org/x/oauth2/microsoft"
 	"gopkg.in/square/go-jose.v2/jwt"
 	k8sRuntime "k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/tools/clientcmd"
 	clientCmdApi "k8s.io/client-go/tools/clientcmd/api"
 	clientCmdLatest "k8s.io/client-go/tools/clientcmd/api/latest"
 )
@@ -33,6 +35,7 @@ type dexterOIDChttp struct {
 	clientSecret    string            // clientSecret commandline flag
 	authName        string            // Cluster name
   state           string            // CSRF protection
+	kubeConfig      string            // Path to an existing kubeconfig
 	scopes          []string          // Additional scopes to request
 	authCodeOptions map[string]string // Authorization code options
 	certificateFile string            // SSL certificate file
@@ -189,6 +192,31 @@ func (d *dexterOIDChttp) showK8sConfig(w http.ResponseWriter, token *oauth2.Toke
 		AuthInfos: map[string]*clientCmdApi.AuthInfo{authName: authInfo},
 	}
 
+	if d.kubeConfig != "" {
+		// write the config
+		tempKubeConfig, err := ioutil.TempFile("", "")
+		defer os.Remove(tempKubeConfig.Name())
+
+		if err != nil {
+			return fmt.Errorf("failed to create tempfile: %s", err)
+		}
+
+		// write snipped to temporary file
+		clientcmd.WriteToFile(*config, tempKubeConfig.Name())
+
+		// setup the order for the file load
+		loadingRules := clientcmd.ClientConfigLoadingRules{
+			Precedence: []string{tempKubeConfig.Name(), d.kubeConfig},
+		}
+
+		// merge the configs
+		config, err = loadingRules.Load()
+
+		if err != nil {
+			return fmt.Errorf("failed to merge configurations: %s", err)
+		}
+	}
+
 	// create a JSON representation
 	json, err := k8sRuntime.Encode(clientCmdLatest.Codec, config)
 
@@ -196,8 +224,10 @@ func (d *dexterOIDChttp) showK8sConfig(w http.ResponseWriter, token *oauth2.Toke
 		return fmt.Errorf("failed to runtime encode config: %s", err)
 	}
 
+	data := strings.Replace(string(json), "your-email", authName, -1)
+
 	// convert JSON to YAML
-	output, err := yaml.JSONToYAML(json)
+	output, err := yaml.JSONToYAML([]byte(data))
 
 	if err != nil {
 		return fmt.Errorf("failed to convert JSON to YAML: %s", err)
@@ -270,6 +300,7 @@ func main() {
 	oidcDataHTTP.clientID = oidcDataHTTP.getEnv("CLIENT_ID", "REDACTED")
 	oidcDataHTTP.clientSecret = oidcDataHTTP.getEnv("CLIENT_SECRET", "REDACTED")
 	oidcDataHTTP.authName = oidcDataHTTP.getEnv("AUTH_NAME", "")
+	oidcDataHTTP.kubeConfig = oidcDataHTTP.getEnv("KUBE_CONFIG_PATH", "")
   oidcDataHTTP.httpClient = &http.Client{Timeout: 2 * time.Second}
   oidcDataHTTP.Oauth2Config = &oauth2.Config{}
 
