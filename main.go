@@ -269,7 +269,7 @@ func main() {
 	oidcDataHTTP.azureTenant = oidcDataHTTP.getEnv("AZURE_TENANT", "")
 	oidcDataHTTP.clientID = oidcDataHTTP.getEnv("CLIENT_ID", "REDACTED")
 	oidcDataHTTP.clientSecret = oidcDataHTTP.getEnv("CLIENT_SECRET", "REDACTED")
-	oidcDataHTTP.authName = oidcDataHTTP.getEnv("AUTH_NAME", "kubernetes")
+	oidcDataHTTP.authName = oidcDataHTTP.getEnv("AUTH_NAME", "")
   oidcDataHTTP.httpClient = &http.Client{Timeout: 2 * time.Second}
   oidcDataHTTP.Oauth2Config = &oauth2.Config{}
 
