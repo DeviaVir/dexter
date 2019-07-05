@@ -284,7 +284,7 @@ func (d *dexterOIDChttp) getEnv(key, fallback string) string {
 var (
   oidcDataHTTP = dexterOIDChttp{
 		Oauth2Config: &oauth2.Config{},
-		httpClient:   &http.Client{Timeout: 2 * time.Second},
+		httpClient:   &http.Client{Timeout: 60 * time.Second},
 	}
 )
 
