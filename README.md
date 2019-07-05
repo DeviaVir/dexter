@@ -146,3 +146,9 @@ Initial code was written by [Daniel Kerwin](mailto:daniel@gini.net) & [David Gon
 
 MIT License. See [License](/LICENSE) for full text.
 
+## Docker
+
+Run a webserver:
+```
+docker run -it -p 3000:3000 --rm -e CLIENT_ID=REDACTED -e CLIENT_SECRET=REDACTED -e USER=root deviavir/dexter
+```
